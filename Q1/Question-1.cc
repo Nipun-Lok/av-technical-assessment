@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-
+#include "canBus.h"
 // Question 1: This is an extension task that requires you to decode sensor data from a CAN log file.
 // CAN (Controller Area Network) is a communication standard used in automotive applications (including Redback cars)
 // to allow communication between sensors and controllers.
@@ -20,35 +20,6 @@
 // Resources:
 // https://www.csselectronics.com/pages/can-bus-simple-intro-tutorial
 // https://www.csselectronics.com/pages/can-dbc-file-database-intro
-
-typedef unsigned long long uint64;
-typedef unsigned short uint16;
-
-// defined by SensorBus.dbc
-namespace Frame {
-    constexpr int CanId{1797};
-    constexpr int BitStart{32};
-    constexpr double Scale{0.1};
-    constexpr int Offset{0};
-};
-
-// returns bit masked packet in little endian
-uint16 getBytes(uint64 packet) {
-    return static_cast<uint16>((packet >> Frame::BitStart) & 0xFFFF);
-}
-
-// converts 2 byte (16 bit) unsigned short from little to big endian
-uint16 convBigEndian(uint16 rawData) {
-    return rawData >> 8 | rawData << 8;
-}
-
-// uses calibration constants to scale and offset raw data into valid speed
-double convSpeed(uint16 rawData) {
-    // reverse byte order and apply 2's complement sign check 
-    short rawValue{static_cast<short>(convBigEndian(rawData))};
-    // apply scaling and offset
-    return Frame::Offset + Frame::Scale * rawValue;
-}
 
 int main(void) {
     std::ifstream canLog{"../Q1/candump.log"};
@@ -84,4 +55,21 @@ int main(void) {
     canLog.close();
     output.close();
     return 0;
+}
+
+//=====================   Helper functions    ===========================
+
+uint16 getBytes(uint64 packet) {
+    return static_cast<uint16>((packet >> Frame::BitStart) & 0xFFFF);
+}
+
+uint16 convBigEndian(uint16 rawData) {
+    return rawData >> 8 | rawData << 8;
+}
+
+double convSpeed(uint16 rawData) {
+    // reverse byte order and apply 2's complement sign check 
+    short rawValue{static_cast<short>(convBigEndian(rawData))};
+    // apply scaling and offset
+    return Frame::Offset + Frame::Scale * rawValue;
 }
