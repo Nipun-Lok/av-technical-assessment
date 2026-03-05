@@ -32,13 +32,6 @@ namespace Frame {
     constexpr int Offset{0};
 };
 
-// remove format specifiers (vcan0) and replace '#' delimiter with space
-// modifies in-place
-void cleanLine(std::string& line) {
-    line.erase(line.find("vcan0 "),6);
-    line.replace(line.find('#'), 1, " ");
-}
-
 // returns bit masked packet in little endian
 uint16 getBytes(uint64 packet) {
     return static_cast<uint16>((packet >> Frame::BitStart) & 0xFFFF);
