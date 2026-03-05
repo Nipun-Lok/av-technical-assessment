@@ -69,6 +69,19 @@ int main(void) {
     std::string buffer{};
     int packetId{};
     while (canLog >> time >> buffer >> packetId) {
+        if (packetId == Frame::CanId) {
+            // skip '#'
+            canLog.ignore();
+
+            uint64 packet{};
+            canLog >> packet;
+            double speed{convSpeed(convBigEndian(getBytes(packet)))};
+            output << time << ": " << speed << '\n';
+        } else {
+            // skip rest of packet
+            canLog >> buffer;
+            canLog.ignore();
+        }
     }
     canLog.close();
     output.close();
