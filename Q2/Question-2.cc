@@ -39,10 +39,12 @@ public:
 
 class SimpleTask : public ITask {
 private:
-    // You can define the members as per your requirement
+    float val_;
 public:
-    explicit SimpleTask(float val) {}
-    // Implement the necessary functions
+    explicit SimpleTask(float val): val_{val} {}
+    void process() override {val_ *= 2.0f;}
+    float getProcessedValue() const override {return val_;}
+    uint8_t getTaskType() const override {return 0;}
 };
 
 class ComplexTask : public ITask {
