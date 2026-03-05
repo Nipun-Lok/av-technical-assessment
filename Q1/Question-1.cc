@@ -77,7 +77,6 @@ int main(void) {
         } else {
             // skip rest of packet
             canLog >> buffer;
-            canLog.ignore();
         }
         // skip to next line
         canLog.ignore();
