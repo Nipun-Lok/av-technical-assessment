@@ -50,9 +50,15 @@ public:
 class ComplexTask : public ITask {
 private:
     // You can define the members as per your requirement
+    std::vector<int> nums_;
+    int sum_{0};
 public:
-    explicit ComplexTask(std::vector<int> nums) {}
-    // Implement the necessary functions
+    explicit ComplexTask(std::vector<int> nums): nums_{nums} {}
+    void process() override {
+        for (const auto& num: nums_) sum_ += num;
+    }
+    float getProcessedValue() const override {return static_cast<float>(sum_);}
+    uint8_t getTaskType() const override {return 1;}
 };
 
 
