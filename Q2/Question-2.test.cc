@@ -10,13 +10,24 @@
 #include "Question-2.cc"
 
 // Sample test case for SimpleTask processing
-TEST(SampleTest, SimpleTaskProcessing) {
-    float initial_value = 12.5f;
-    SimpleTask task(initial_value);
+TEST(Task1, SimpleTaskProcessing) {
+    float initialValue = 12.5f;
+    SimpleTask task(initialValue);
 
     task.process();
 
-    float expected_value = 25.0f;
-    EXPECT_FLOAT_EQ(task.getProcessedValue(), expected_value);
+    float expectedValue = 25.0f;
+    EXPECT_FLOAT_EQ(task.getProcessedValue(), expectedValue);
     EXPECT_EQ(task.getTaskType(), 0);
+}
+
+TEST(Task1, ComplexTaskProcessing) {
+    std::vector<int> nums{{1,2,3,4}};
+    ComplexTask task(nums);
+    
+    task.process();
+
+    int expectedSum{10};
+    EXPECT_EQ(task.getProcessedValue(), expectedSum);
+    EXPECT_EQ(task.getTaskType(), 1);
 }
