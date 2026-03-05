@@ -62,6 +62,10 @@ int main(void) {
     if (!canLog) throw std::runtime_error("File not found\n");
     std::ofstream output{"Q1/output.txt"};
     if (!output) throw std::runtime_error("Cannot open file\n");
+
+    // initialise fstream formats
+    output.setf(std::ios::fixed, std::ios::floatfield);
+    output.precision(1);
     canLog >> std::hex;
 
     std::string time{};
@@ -82,6 +86,8 @@ int main(void) {
             canLog >> buffer;
             canLog.ignore();
         }
+        // skip to next line
+        canLog.ignore();
     }
     canLog.close();
     output.close();
