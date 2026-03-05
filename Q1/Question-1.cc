@@ -39,3 +39,7 @@ void cleanLine(std::string& line) {
     line.replace(line.find('#'), 1, " ");
 }
 
+// returns bit masked packet in little endian
+uint16 getBytes(uint64 packet) {
+    return static_cast<uint16>((packet >> Frame::BitStart) & 0xFFFF);
+}
