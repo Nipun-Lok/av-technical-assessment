@@ -57,3 +57,12 @@ double convSpeed(uint16 rawData) {
     return Frame::Offset + Frame::Scale * rawValue;
 }
 
+int main(void) {
+    std::ifstream canLog{"Q1/candump.log"};
+    if (!canLog) throw std::runtime_error("File not found\n");
+    std::ofstream output{"Q1/output.txt"};
+    if (!output) throw std::runtime_error("Cannot open file\n");
+    canLog.close();
+    output.close();
+    return 0;
+}
