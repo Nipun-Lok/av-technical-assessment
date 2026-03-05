@@ -62,6 +62,14 @@ int main(void) {
     if (!canLog) throw std::runtime_error("File not found\n");
     std::ofstream output{"Q1/output.txt"};
     if (!output) throw std::runtime_error("Cannot open file\n");
+    canLog >> std::hex;
+
+    std::string time{};
+    // dummy string to skip "vcan0"
+    std::string buffer{};
+    int packetId{};
+    while (canLog >> time >> buffer >> packetId) {
+    }
     canLog.close();
     output.close();
     return 0;
