@@ -43,3 +43,9 @@ void cleanLine(std::string& line) {
 uint16 getBytes(uint64 packet) {
     return static_cast<uint16>((packet >> Frame::BitStart) & 0xFFFF);
 }
+
+// converts 2 byte (16 bit) unsigned short from little to big endian
+uint16 convBigEndian(uint16 rawData) {
+    return rawData >> 8 | rawData << 8;
+}
+
