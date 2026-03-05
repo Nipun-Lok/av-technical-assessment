@@ -104,6 +104,7 @@ public:
     }
 };
 
+#ifndef TESTING
 int main() {
     std::cout << "Starting the data generation pipeline" << std::endl;
 
@@ -132,3 +133,4 @@ int main() {
 
     return 0;
 }
+#endif

@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cstring>
-
+#define TESTING
 // We include the implementation file to get access to the classes.
 // In a real project, you would have separate header files.
 #include "Question-2.cc"
