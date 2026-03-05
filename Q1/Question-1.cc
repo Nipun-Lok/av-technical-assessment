@@ -20,6 +20,10 @@
 // Resources:
 // https://www.csselectronics.com/pages/can-bus-simple-intro-tutorial
 // https://www.csselectronics.com/pages/can-dbc-file-database-intro
+
+typedef unsigned long long uint64;
+typedef unsigned short uint16;
+
 // defined by SensorBus.dbc
 namespace Frame {
     constexpr int CanId{1797};
@@ -27,3 +31,11 @@ namespace Frame {
     constexpr double Scale{0.1};
     constexpr int Offset{0};
 };
+
+// remove format specifiers (vcan0) and replace '#' delimiter with space
+// modifies in-place
+void cleanLine(std::string& line) {
+    line.erase(line.find("vcan0 "),6);
+    line.replace(line.find('#'), 1, " ");
+}
+
