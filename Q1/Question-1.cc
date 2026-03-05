@@ -20,3 +20,10 @@
 // Resources:
 // https://www.csselectronics.com/pages/can-bus-simple-intro-tutorial
 // https://www.csselectronics.com/pages/can-dbc-file-database-intro
+// defined by SensorBus.dbc
+namespace Frame {
+    constexpr int CanId{1797};
+    constexpr int BitStart{32};
+    constexpr double Scale{0.1};
+    constexpr int Offset{0};
+};
