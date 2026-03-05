@@ -49,3 +49,11 @@ uint16 convBigEndian(uint16 rawData) {
     return rawData >> 8 | rawData << 8;
 }
 
+// uses calibration constants to scale and offset raw data into valid speed
+double convSpeed(uint16 rawData) {
+    // reverse byte order and apply 2's complement sign check 
+    short rawValue{static_cast<short>(convBigEndian(rawData))};
+    // apply scaling and offset
+    return Frame::Offset + Frame::Scale * rawValue;
+}
+
