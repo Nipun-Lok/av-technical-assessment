@@ -18,8 +18,6 @@ namespace Frame {
  */
 uint16 getBytes(uint64 packet);
 
-// converts 2 byte (16 bit) unsigned short from little to big endian
-
 /**
  * Converts 2 byte (16 bit) unsigned short from little to big endian
  * @param rawData 2 Byte int in little endian form
