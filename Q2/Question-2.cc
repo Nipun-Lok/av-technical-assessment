@@ -4,22 +4,32 @@
 #include <memory>
 #include <iomanip>
 #include <atomic>
+#include <mutex>
+#include <condition_variable>
+#include <queue>
 
 template<typename T>
 class ThreadSafeQueue {
 private:
-    // Implement this
+    std::mutex mx_;
+    std::condition_variable cv_;
+    std::queue<T> queue_;
+
 public:
     void push(T value) {
-        // Implement this
+        {
+            std::lock_guard<std::mutex> lock(mx_);
+            queue_.push(std::move(value));
+        }
+        cv_.notify_one();
     }
     T pop() {
         // Implement this
         return nullptr;
     }
     size_t size() {
-        // Implement this
-        return 0;
+        std::lock_guard<std::mutex> lock(mx_);
+        return queue_.size();
     }
     // A non-blocking pop for graceful shutdown
     T pop_for_shutdown() {
@@ -49,12 +59,12 @@ public:
 
 class ComplexTask : public ITask {
 private:
-    // You can define the members as per your requirement
     std::vector<int> nums_;
     int sum_{0};
 public:
     explicit ComplexTask(std::vector<int> nums): nums_{nums} {}
     void process() override {
+        sum_ = 0;
         for (const auto& num: nums_) sum_ += num;
     }
     float getProcessedValue() const override {return static_cast<float>(sum_);}
@@ -70,7 +80,19 @@ public:
     TaskGenerator(ThreadSafeQueue<std::unique_ptr<ITask>>& queue, std::atomic<bool>& shutdown)
         : task_queue_(queue), shutdown_(shutdown) {}
     void run() {
-        // Implement the task generation loop with a shutdown check
+        // do not run if shutting down
+        if (shutdown_.load()) return;
+        std::unique_ptr<ITask> task;
+        // alternate between simple and complex tasks 10 times
+        for (int count{10}; !shutdown_.load() && count ; count--) {
+            if (count % 2) {
+                // simple tasks use task_queue_ size as preprocessed value
+                task = std::make_unique<SimpleTask>(static_cast<float>(task_queue_.size()));
+            } else {
+                task = std::make_unique<ComplexTask>(std::vector<int>({1,2,3,4}));
+            }
+            task_queue_.push(std::move(task));
+        }
     }
 };
 
