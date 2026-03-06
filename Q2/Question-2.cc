@@ -52,8 +52,20 @@ private:
     float val_;
 public:
     explicit SimpleTask(float val): val_{val} {}
+
+    /**
+     * @brief Doubles the stored value
+     */
     void process() override {val_ *= 2.0f;}
+
+    /**
+     * @return stored value
+     */
     float getProcessedValue() const override {return val_;}
+
+    /**
+     * @return 0 for SimpleTask
+     */
     uint8_t getTaskType() const override {return 0;}
 };
 
