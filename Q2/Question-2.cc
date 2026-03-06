@@ -15,6 +15,18 @@ private:
     std::condition_variable cv_;
     std::queue<T> queue_;
 
+    /** 
+     * @brief Tries to pop element off front of queue
+     * @return popped off element or
+     * @return nullptr if queue empty.
+     */
+    T pop_() {
+        if (queue_.empty()) return nullptr;
+        T value{std::move(queue_.front())};
+        queue_.pop();
+        return value;
+    }
+
 public:
     /**
      * @brief Pushes value into queue. Notifies next paused thread when completed
@@ -27,9 +39,21 @@ public:
         }
         cv_.notify_one();
     }
-    T pop() {
-        // Implement this
-        return nullptr;
+
+    /**
+     * @brief Pops element off front of queue. Pauses thread if queue empty or 
+     * shutdown and rechecks every 50ms. On wake will still run and return as 
+     * normal.
+     * @param shutdown atomic flag to indicate shutdown process
+     * @return popped element or nullptr if empty.
+     */
+    T pop(std::atomic<bool>& shutdown) {
+        std::unique_lock<std::mutex> lock(mx_);
+        // if queue empty pause thread and check again occasionally
+        while (queue_.empty() && !shutdown.load()) {
+            cv_.wait_for(lock, std::chrono::milliseconds(50));
+        }
+        return pop_();
     }
 
     // /**
@@ -39,10 +63,13 @@ public:
         std::lock_guard<std::mutex> lock(mx_);
         return queue_.size();
     }
-    // A non-blocking pop for graceful shutdown
+
+    /**
+     * @brief A non-blocking pop for graceful shutdown
+     */ 
     T pop_for_shutdown() {
-        // Implement this
-        return nullptr;
+        std::lock_guard<std::mutex> lock(mx_);
+        return pop_();
     }
 };
 
@@ -139,8 +166,25 @@ private:
 public:
     TaskProcessor(ThreadSafeQueue<std::unique_ptr<ITask>>& t_queue, ThreadSafeQueue<std::unique_ptr<ITask>>& p_queue, std::atomic<bool>& shutdown)
         : task_queue_(t_queue), processed_queue_(p_queue), shutdown_(shutdown) {}
+
+    /**
+     * @brief Pops task from task queue, process and pushes to processed queue
+     */
     void run() {
-        // Implement the data processing loop with a shutdown check
+        std::unique_ptr<ITask> task;
+        // runs until shutdown flag is set or task queue is empty
+        while (!shutdown_.load()) {
+            task = task_queue_.pop(shutdown_);
+            if (task) {
+                task->process();
+                processed_queue_.push(std::move(task));
+            }
+        }
+        // runs until task queue is empty
+        while ((task = task_queue_.pop_for_shutdown())) {
+            task->process();
+            processed_queue_.push(std::move(task));
+        }
     }
 };
 
