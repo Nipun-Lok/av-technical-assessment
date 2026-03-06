@@ -111,11 +111,14 @@ private:
 public:
     TaskGenerator(ThreadSafeQueue<std::unique_ptr<ITask>>& queue, std::atomic<bool>& shutdown)
         : task_queue_(queue), shutdown_(shutdown) {}
+    
+    /**
+     * @brief Adds tasks to threadsafe queue
+     */
     void run() {
-        // do not run if shutting down
-        if (shutdown_.load()) return;
         std::unique_ptr<ITask> task;
-        // alternate between simple and complex tasks 10 times
+        // alternate between simple and complex tasks 10 times or until
+        // shutdown flag is set
         for (int count{10}; !shutdown_.load() && count ; count--) {
             if (count % 2) {
                 // simple tasks use task_queue_ size as preprocessed value
