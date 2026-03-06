@@ -83,11 +83,23 @@ private:
     int sum_{0};
 public:
     explicit ComplexTask(std::vector<int> nums): nums_{nums} {}
+
+    /**
+     * @brief Computes sum of elements in vector
+     */
     void process() override {
         sum_ = 0;
         for (const auto& num: nums_) sum_ += num;
     }
+
+    /**
+     * @return post processed sum of elements in vector as float
+     */
     float getProcessedValue() const override {return static_cast<float>(sum_);}
+
+    /**
+     * @return 1 for ComplexTask
+     */
     uint8_t getTaskType() const override {return 1;}
 };
 
