@@ -16,6 +16,10 @@ private:
     std::queue<T> queue_;
 
 public:
+    /**
+     * @brief Pushes value into queue. Notifies next paused thread when completed
+     * @param value Element to be added to queue
+     */
     void push(T value) {
         {
             std::lock_guard<std::mutex> lock(mx_);
