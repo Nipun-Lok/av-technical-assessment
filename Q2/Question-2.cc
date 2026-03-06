@@ -31,6 +31,10 @@ public:
         // Implement this
         return nullptr;
     }
+
+    // /**
+    //  * @return size of queue
+    //  */
     size_t size() {
         std::lock_guard<std::mutex> lock(mx_);
         return queue_.size();
