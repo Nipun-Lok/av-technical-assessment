@@ -1,0 +1,13 @@
+System:
+    -   float and int are 4 bytes
+    -   unbounded buffer size for thread safe queues
+        -   can be limited if required by blocking task generator thread when 
+            set limit is reached
+
+Implementation:
+    -   no implemented specification on how tasks are generated before being
+        placed in queue.
+        -   current implementation alternates between simple and complex tasks
+            for white box testing
+        -   can the designed to read in instructions from stream (file or data)
+    -   50ms shutdown latency is assumed to be permitted.
