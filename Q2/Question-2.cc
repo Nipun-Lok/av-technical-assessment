@@ -7,6 +7,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <queue>
+#include <cstring>
+#include <ctime>
 
 template<typename T>
 class ThreadSafeQueue {
@@ -146,7 +148,7 @@ public:
         std::unique_ptr<ITask> task;
         // alternate between simple and complex tasks 10 times or until
         // shutdown flag is set
-        for (int count{10}; !shutdown_.load() && count ; count--) {
+        for (int count{10}; !shutdown_.load() && count; count--) {
             if (count % 2) {
                 // simple tasks use task_queue_ size as preprocessed value
                 task = std::make_unique<SimpleTask>(static_cast<float>(task_queue_.size()));
@@ -195,14 +197,56 @@ private:
 public:
     PacketTransmitter(ThreadSafeQueue<std::unique_ptr<ITask>>& queue, std::atomic<bool>& shutdown)
         : processed_queue_(queue), shutdown_(shutdown) {}
-    void run() {
-        // Implement the data transmission (bitpacking) loop with a shutdown check
+
+    /**
+     * @brief Sends data to ostream os and pops task off processed queue
+     */
+    void run(std::ostream& os) {
+        std::unique_ptr<ITask> task;
+        while (!shutdown_.load() && (task = processed_queue_.pop(shutdown_))) {
+            transmit(task, os);
+        }
+        // fall through and exit if shutdown
+        while ((task = processed_queue_.pop_for_shutdown())) {
+            transmit(task, os);
+        }
     }
+
+    /**
+     * @brief transmits data to os ostream
+     * @param data unique pointer to task
+     * @param os output stream
+     */
     void transmit(const std::unique_ptr<ITask>& data, std::ostream& os) {
+        int currentTime = std::time(nullptr);
         uint8_t buffer[8] = {0};
+
+        // write task type
+        buffer[0] = (data->getTaskType()) ? 0x40:0;
+
+        // check task type through bitmask at bit 6 and copy processed value
+        // in big endian 
+        int val{};
+        if (!(buffer[0] & 0x40)) {
+            float rawFloat = data->getProcessedValue();
+            // copy bits to integer for bitwise operations
+            std::memcpy(&val, &rawFloat, sizeof(float));
+        } else {
+            // cast to int to write as integer representation
+            val = static_cast<int>(data->getProcessedValue());
+        }
         
-        // Bitpacking logic
-        // Implement the bitpacking logic here
+        // reverse to big endian
+        val = val >> 24 
+            | ((val >> 8) & 0xFF00)
+            | ((val << 8) & 0xFF0000)
+            | ((val << 24) & 0xFF000000);
+        std::memcpy(&buffer[1], &val, sizeof(int));
+
+        // copy least significant 3 bytes. currentTime is little endian -> convert
+        buffer[5] = (currentTime >> 16) & 0xFF;
+        buffer[6] = (currentTime >> 8) & 0xFF;
+        buffer[7] = currentTime & 0xFF;
 
         // Print the buffer in hex format for verification
         os << "Packet: ";
