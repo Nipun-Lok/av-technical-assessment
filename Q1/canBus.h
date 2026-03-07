@@ -7,6 +7,8 @@ typedef unsigned short uint16;
 namespace Frame {
     constexpr int CanId{1797};
     constexpr int BitStart{32};
+    constexpr int PacketLen{64};
+    constexpr int DataLen{16};
     constexpr double Scale{0.1};
     constexpr int Offset{0};
 };
@@ -26,9 +28,10 @@ uint16 getBytes(uint64 packet);
 uint16 convBigEndian(uint16 rawData);
 
 /**
- * uses calibration constants to scale and offset raw data into valid speed
- * @param rawData data extraxted from can bus packet
+ * Extracts bytes, converts to big endian and uses calibration constants to
+ * scale and offset raw data into valid speed.
+ * @param packet full data packet after # from can log entry
  * @return value converted to signed number and adjusted by calibration constants
  */
-double convSpeed(uint16 rawData);
+double getSpeed(uint64 packet);
 

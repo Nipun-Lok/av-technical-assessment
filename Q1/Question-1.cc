@@ -43,8 +43,8 @@ int main(void) {
 
             uint64 packet{};
             canLog >> packet;
-            double speed{convSpeed(convBigEndian(getBytes(packet)))};
-            output << time << ": " << speed << '\n';
+
+            output << time << ": " << getSpeed(packet) << '\n';
         } else {
             // skip rest of packet
             canLog >> buffer;
@@ -60,14 +60,20 @@ int main(void) {
 //=====================   Helper functions    ===========================
 
 uint16 getBytes(uint64 packet) {
-    return static_cast<uint16>((packet >> Frame::BitStart) & 0xFFFF);
+    return static_cast<uint16>(
+        // shift until last byte of the required data is the LSB
+        (packet >> (Frame::PacketLen - Frame::BitStart - Frame::DataLen))
+        // bitmask to extract the required number of bytes
+         & ((1 << Frame::DataLen) - 1)
+    );
 }
 
 uint16 convBigEndian(uint16 rawData) {
     return rawData >> 8 | rawData << 8;
 }
 
-double convSpeed(uint16 rawData) {
+double getSpeed(uint64 packet) {
+    uint16 rawData {getBytes(packet)};
     // reverse byte order and apply 2's complement sign check 
     short rawValue{static_cast<short>(convBigEndian(rawData))};
     // apply scaling and offset
